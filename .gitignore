@@ -34,3 +34,6 @@ node_modules
 config/runtime.yaml
 
 .DS_Store
+
+# Ignore workspace files
+p11-argentbank.code-workspace

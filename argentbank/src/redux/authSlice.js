@@ -20,6 +20,7 @@ export const loginUser = createAsyncThunk(
   }
 );
 
+// Création de l'action asynchrone fetchUserProfile pour récupérer le profil de l'utilisateur
 export const fetchUserProfile = createAsyncThunk(
   "auth/fetchUserProfile",
   async (_, { getState }) => {
@@ -36,6 +37,25 @@ export const fetchUserProfile = createAsyncThunk(
   }
 );
 
+// Création de l'action asynchrone updateUsername pour mettre à jour le nom d'utilisateur
+export const updateUsername = createAsyncThunk(
+  "auth/updateUsername",
+  async (newUsername, { getState }) => {
+    const state = getState(); // Récupération de l'état actuel du store
+    const token = state.auth.token; // Récupération du token d'authentification de l'utilisateur
+    await axios.put(
+      "http://localhost:3001/api/v1/user/profile",
+      {
+        userName: newUsername,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return { userName: newUsername }; // Contient le nouveau nom d'utilisateur
+  }
+);
+
 // Création du slice authSlice pour gérer l'état de l'authentification de l'utilisateur
 const authSlice = createSlice({
   name: "auth", // Nom du slice
@@ -43,17 +63,21 @@ const authSlice = createSlice({
   initialState: {
     token: localStorage.getItem("token") || null,
     username: localStorage.getItem("username") || null,
+    firstName: null,
+    lastName: null,
   },
-  // Reducer pour la déconnexion de l'utilisateur
   reducers: {
+    // Reducer pour la déconnexion de l'utilisateur
     logout(state) {
       state.token = null; // Le token est réinitialisé
       state.username = null; // Le nom d'utilisateur est réinitialisé
+      state.firstName = null; // Le prénom est réinitialisé
+      state.lastName = null; // Le nom est réinitialisé
       localStorage.removeItem("token"); // Le token est supprimé du localStorage
       localStorage.removeItem("username"); // Le nom d'utilisateur est supprimé du localStorage
     },
   },
-  // Gestion des actions asynchrones loginUser avec les états loading, succeeded et failed
+  // Gestion des actions asynchrones
   extraReducers: (builder) => {
     builder
       // Gestion de la réussite de l'action
@@ -63,7 +87,13 @@ const authSlice = createSlice({
       })
       .addCase(fetchUserProfile.fulfilled, (state, action) => {
         state.username = action.payload.userName; // Le nom d'utilisateur est stocké
+        state.firstName = action.payload.firstName; // Le prénom est stocké
+        state.lastName = action.payload.lastName; // Le nom est stocké
         localStorage.setItem("username", action.payload.userName); // Le nom d'utilisateur est stocké dans le localStorage
+      })
+      .addCase(updateUsername.fulfilled, (state, action) => {
+        state.username = action.payload.userName; // Le nom d'utilisateur est mis à jour
+        localStorage.setItem("username", action.payload.userName); // Le nom d'utilisateur est mis à jour dans le localStorage
       });
   },
 });

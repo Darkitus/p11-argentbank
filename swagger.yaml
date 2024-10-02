@@ -1,9 +1,9 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
   title: Bank Argent API documentation
   description: Contains all available API endpoints in this codebase
-  version: '1.0.0'
-  termsOfService: 'http://swagger.io/terms/'
+  version: "1.0.0"
+  termsOfService: "http://swagger.io/terms/"
 host: localhost:3001
 basePath: /api/v1
 schemes:
@@ -21,17 +21,17 @@ paths:
           description: Login Payload
           required: true
           schema:
-            $ref: '#/definitions/Login'
+            $ref: "#/definitions/Login"
       produces:
         - application/json
       responses:
-        '200':
+        "200":
           description: Login Successfully
           schema:
-            $ref: '#/definitions/LoginResponse'
-        '400':
+            $ref: "#/definitions/LoginResponse"
+        "400":
           description: Invalid Fields
-        '500':
+        "500":
           description: Internal Server Error
   /user/signup:
     post:
@@ -45,17 +45,17 @@ paths:
           description: Signup Payload
           required: true
           schema:
-            $ref: '#/definitions/User'
+            $ref: "#/definitions/User"
       produces:
         - application/json
       responses:
-        '200':
+        "200":
           description: Signup Successfully
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '400':
+            $ref: "#/definitions/ApiResponse"
+        "400":
           description: Invalid Fields
-        '500':
+        "500":
           description: Internal Server Error
   /user/profile:
     post:
@@ -66,15 +66,15 @@ paths:
       summary: User Profile API
       description: API for fetching a user profile
       #produces:
-       # - application/json
+      # - application/json
       responses:
-        '200':
+        "200":
           description: User profile retrieved successully
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '400':
+            $ref: "#/definitions/ApiResponse"
+        "400":
           description: Invalid Fields
-        '500':
+        "500":
           description: Internal Server Error
     put:
       security:
@@ -89,17 +89,133 @@ paths:
           description: Update user profile attributes
           required: true
           schema:
-            $ref: '#/definitions/UserProfile'
+            $ref: "#/definitions/UserProfile"
       produces:
         - application/json
       responses:
-        '200':
+        "200":
           description: User profile retrieved successully
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '400':
+            $ref: "#/definitions/ApiResponse"
+        "400":
           description: Invalid Fields
-        '500':
+        "500":
+          description: Internal Server Error
+  # Liste des comptes bancaire d'un utilisateur
+  /accounts:
+    post:
+      security:
+        - Bearer: []
+      tags:
+        - Accounts
+      summary: User Bank Accounts API
+      description: API for fetching user bank accounts
+      responses:
+        "200":
+          description: User bank accounts retrieved successfully
+          schema:
+            $ref: "#/definitions/BankAccountsCollection"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Bank accounts not found
+        "500":
+          description: Internal Server Error
+  /account:
+    post:
+      security:
+        - Bearer: []
+      tags:
+        - Accounts
+      summary: User Bank Account API
+      description: API for fetching user bank account
+      parameters:
+        - in: body
+          name: accountNumber
+          description: Account Number
+          required: true
+          schema:
+            $ref: "#/definitions/AccountNumber"
+      responses:
+        "200":
+          description: User bank account retrieved successfully
+          schema:
+            $ref: "#/definitions/BankAccount"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Bank accounts not found
+        "500":
+          description: Internal Server Error
+  # Liste des transactions d'un compte bancaire
+  /account/transactions:
+    post:
+      security:
+        - Bearer: []
+      tags:
+        - Accounts
+      summary: User Bank Account Transactions API
+      description: API for fetching user bank account transactions
+      parameters:
+        - in: body
+          name: accountNumber
+          description: Account Number
+          required: true
+          schema:
+            $ref: "#/definitions/AccountNumber"
+      responses:
+        "200":
+          description: User bank account transactions retrieved successfully
+          schema:
+            $ref: "#/definitions/AccountsTransactions"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Transaction not found
+        "500":
+          description: Internal Server Error
+  # Modifier la categorie et la note d'une transaction
+  /transactions/:
+    put:
+      security:
+        - Bearer: []
+      tags:
+        - Accounts
+      summary: Update Transaction
+      description: API for updating a transaction category and note
+      parameters:
+        - in: body
+          name: transaction
+          description: Transaction data
+          required: true
+          schema:
+            $ref: "#/definitions/TransactionUpdate"
+      responses:
+        "200":
+          description: Transaction updated successfully
+          schema:
+            $ref: "#/definitions/Transaction"
+        "401":
+          description: Unauthorized
+        "404":
+          description: Transaction not found
+        "500":
+          description: Internal Server Error
+  # Liste des categories de transactions
+  /categories:
+    get:
+      tags:
+        - Categories
+      summary: Get list of categories
+      description: Retrieve a list of transactions categories
+      responses:
+        "200":
+          description: A list of categories
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Category"
+        "500":
           description: Internal Server Error
 securityDefinitions:
   Bearer:
@@ -155,4 +271,99 @@ definitions:
     type: object
     properties:
       userName:
+        type: string
+  AccountNumber:
+    properties:
+      accountNumber:
+        type: string
+  BankAccountsCollection:
+    type: object
+    properties:
+      accounts:
+        type: array
+        items:
+          type: object
+          properties:
+            accountNumber:
+              type: string
+            accountType:
+              type: string
+            balance:
+              type: number
+              format: float
+            currency:
+              type: string
+  BankAccount:
+    type: object
+    properties:
+      accounts:
+        type: object
+        items:
+          type: object
+          properties:
+            accountNumber:
+              type: string
+            accountType:
+              type: string
+            balance:
+              type: number
+              format: float
+            currency:
+              type: string
+  AccountsTransactions:
+    type: object
+    properties:
+      accounts:
+        type: array
+        items:
+          type: object
+          properties:
+            transactionId:
+              type: string
+            date:
+              type: string
+              format: date
+            description:
+              type: string
+            amount:
+              type: number
+              format: float
+            balance:
+              type: number
+              format: float
+            currency:
+              type: string
+            transactionType:
+              type: string
+            category:
+              type: string
+            note:
+              type: string
+  TransactionUpdate:
+    type: object
+    properties:
+      transactionNumber:
+        type: string
+        description: Transaction Number
+      category:
+        type: string
+        description: Transaction category
+      note:
+        type: string
+        description: Transaction note
+  Transaction:
+    type: object
+    properties:
+      transactionNumber:
+        type: string
+      category:
+        type: string
+      note:
+        type: string
+  Category:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
         type: string

@@ -313,7 +313,7 @@ definitions:
   AccountsTransactions:
     type: object
     properties:
-      accounts:
+      transactions:
         type: array
         items:
           type: object
